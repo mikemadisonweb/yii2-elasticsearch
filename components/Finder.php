@@ -11,20 +11,41 @@ class Finder
     protected $params;
     protected $client;
 
-    public function __construct($index, $mapping, Client $client, QueryInterface $query)
+    /**
+     * @var QueryInterface
+     */
+    protected $query;
+    protected $mapping;
+
+    public function __construct($index, $mapping, Client $client)
     {
         if (!isset($index['index'])) {
             throw new InvalidConfigException('Index name is not configured.');
         }
-        $this->index    = $index;
-        $this->params = [
-            'index' => $this->index['index'],
-            'type' => $mapping,
-            'body' => null,
-        ];
-        $this->client   = $client;
+        $this->index = $index;
+        $this->mapping = $mapping;
+        $this->resetParams();
+        $this->client = $client;
+        // default
+        $this->query = new Query();
+    }
+
+    /**
+     * @param QueryInterface $query
+     */
+    public function setQuery(QueryInterface $query)
+    {
         $this->query = $query;
     }
+
+    /**
+     * @return QueryInterface
+     */
+    public function getQuery()
+    {
+        return $this->query;
+    }
+
 
     /**
      * @param $include
@@ -258,7 +279,7 @@ class Finder
         unset($this->params['body']);
         $this->params['id'] = $id;
         $response = $this->client->get($this->params);
-        $this->query->reset();
+        $this->resetParams();
 
         return $response['_source'];
     }
@@ -273,7 +294,7 @@ class Finder
         unset($this->params['body']);
         $this->params['id'] = $id;
         $response = $this->client->exists($this->params);
-        $this->query->reset();
+        $this->resetParams();
 
         return $response;
     }
@@ -284,15 +305,12 @@ class Finder
     public function all()
     {
         if (!isset($this->params['body']['query'])) {
-            $query = $this->query->build();
-            if (empty($query)) {
-                $query['match_all'] = ['boost' => 1.0];
-            }
-            $this->params['body']['query'] = $query;
+            $this->params['body']['query'] = $this->query->build();
         }
 
         $this->applyDefaults();
         $response = $this->client->search($this->params);
+        $this->resetParams();
         $this->query->reset();
 
         return new ElasticResponse($response);
@@ -304,16 +322,13 @@ class Finder
     public function count()
     {
         if (!isset($this->params['body']['query'])) {
-            $query = $this->query->build();
-            if (empty($query)) {
-                $query['match_all'] = ['boost' => 1.0];
-            }
-            $this->params['body']['query'] = $query;
+            $this->params['body']['query'] = $this->query->build();
         }
 
         unset($this->params['size']);
         unset($this->params['sort']);
         $response = $this->client->count($this->params);
+        $this->resetParams();
         $this->query->reset();
 
         return $response['count'];
@@ -321,13 +336,14 @@ class Finder
 
     /**
      * @param $json
-     * @return array
+     * @return ElasticResponse
      */
     public function sendJson($json)
     {
         $this->params['body'] = $json;
+        $response = $this->client->search($this->params);
 
-        return $this->client->search($this->params);
+        return new ElasticResponse($response);
     }
 
     /**
@@ -345,8 +361,6 @@ class Finder
 
         if (!isset($this->params['body']['highlight']) && isset($this->index['defaults']['highlight'])) {
             if (isset($this->index['defaults']['highlight']['enabled']) && $this->index['defaults']['highlight']['enabled']) {
-                // $this->params['_source'] = false;
-
                 if (isset($this->index['defaults']['highlight']['fields'])) {
                     $this->params['body']['highlight']['fields'] = $this->index['defaults']['highlight']['fields'];
                 } else {
@@ -362,5 +376,14 @@ class Finder
                 }
             }
         }
+    }
+
+    protected function resetParams()
+    {
+        $this->params = [
+            'index' => $this->index['index'],
+            'type' => $this->mapping,
+            'body' => null,
+        ];
     }
 }

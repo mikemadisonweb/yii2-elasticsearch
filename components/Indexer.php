@@ -4,12 +4,14 @@ namespace mikemadisonweb\elasticsearch\components;
 
 use Elasticsearch\Client;
 use yii\base\InvalidConfigException;
+use yii\db\Exception;
 
 class Indexer
 {
     protected $index;
-    protected $mapping;
     protected $client;
+    protected $params;
+    protected $mapping;
 
     /**
      * Indexer constructor.
@@ -24,7 +26,12 @@ class Indexer
             throw new InvalidConfigException('Index name is not configured.');
         }
         $this->index    = $index;
-        $this->mapping  = $mapping;
+        $this->mapping = $mapping;
+        $this->params = [
+            'index' => $this->index['index'],
+            'type' => $mapping,
+            'body' => null,
+        ];
         $this->client   = $client;
     }
 
@@ -33,20 +40,22 @@ class Indexer
      * @param array $fields
      * @param string $id
      * @return array
+     * @throws \Exception
      */
     public function insert(array $fields, $id = '')
     {
-        $params = [
-            'index' => $this->index['index'],
-            'type' => $this->mapping,
-            'body' => $fields,
-        ];
-
-        if ('' !== $id) {
-            $params['id'] = $id;
+        if (empty($fields)) {
+            $passedId = $id ? " Document id: {$id}" : '';
+            throw new \Exception("You are trying to insert empty document.{$passedId}");
         }
 
-        return $this->client->index($params);
+        $this->params['body'] = $fields;
+
+        if ('' !== $id) {
+            $this->params['id'] = $id;
+        }
+
+        return $this->client->index($this->params);
     }
 
     /**
@@ -72,29 +81,25 @@ class Indexer
             $body['params'] = $scriptParams;
         }
 
-        $params = [
-            'index' => $this->index['index'],
-            'type' => $this->mapping,
-            'id' => $id,
-            'body' => $body,
-        ];
+        $this->params['id'] = $id;
+        $this->params['body'] = $body;
 
-        return $this->client->update($params);
+        return $this->client->update($this->params);
     }
 
     /**
      * @param $id
      * @return array
+     * @throws \Exception
      */
     public function delete($id)
     {
-        $params = [
-            'index' => $this->index['index'],
-            'type' => $this->mapping,
-            'id' => $id,
-        ];
+        if (!$id) {
+            throw new \Exception('You should pass document id in order to delete.');
+        }
+        $this->params['id'] = $id;
 
-        return $this->client->delete($params);
+        return $this->client->delete($this->params);
     }
 
     /**
@@ -130,7 +135,7 @@ class Indexer
         if ($response['errors']) {
             foreach ($response['items'] as $item) {
                 if (isset($item['index']['error'])) {
-                    \Yii::$app->elasticsearch->trigger(Event::BULK_ERRORS, new Event([
+                    \Yii::$app->elasticsearch->trigger(ElasticErrorEvent::BULK_ERRORS, new ElasticErrorEvent([
                         'indexName' => $this->index,
                         'documentId' => $item['index']['_id'],
                         'error' => $item['index']['error'],
@@ -140,10 +145,11 @@ class Indexer
             }
         }
 
-        return $this->client->bulk($params);
+        return $response;
     }
 
     /**
+     * Check whether an array is associative or numeric
      * @param array $arr
      * @return bool
      */

@@ -21,6 +21,7 @@ class IndexController extends Controller
      */
     public function __construct($id, Module $module, array $config = [])
     {
+        parent::__construct($id, $module, $config);
         $this->console = new BaseConsole();
     }
 

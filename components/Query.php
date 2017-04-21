@@ -11,7 +11,12 @@ class Query implements QueryInterface
      */
     public function build()
     {
-        return array_filter($this->params);
+        $query = array_filter($this->params);
+        if (empty($query)) {
+            $query['match_all'] = new \stdClass();
+        }
+
+        return $query;
     }
 
     public function reset()
