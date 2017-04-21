@@ -1,0 +1,22 @@
+{
+    "name": "mikemadisonweb/yii2-elasticsearch",
+    "description": "Wrapper based on php-amqplib to incorporate messaging in your Yii2 application via RabbitMQ. Inspired by RabbitMqBundle for Symfony 2, really awesome package.",
+    "type": "yii2-extension",
+    "keywords": ["yii2","extension","elasticsearch","amqp","message queue","distributed systems"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mikhail Bakulin",
+            "email": "mikemadweb@gmail.com"
+        }
+    ],
+    "require": {
+        "yiisoft/yii2": "^2.0",
+        "elasticsearch/elasticsearch": "~5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "mikemadisonweb\\elasticsearch\\": ""
+        }
+    }
+}
