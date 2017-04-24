@@ -115,7 +115,7 @@ class Finder
      * Full-text searches
      * @param $fields
      * @param $query
-     * @return $this
+     * @return ElasticResponse
      * @throws \Exception
      */
     public function match($query, $fields = '_all')
@@ -136,11 +136,11 @@ class Finder
             ]);
         }
 
-        return $this;
+        return $this->all();
     }
 
     /**
-     * todo() Add query SQL-like syntax string parsing (nested logic not supported right now)
+     * todo() Rewrite as query SQL-like syntax string parsing (nested logic not supported right now)
      * @param $field
      * @param $operator
      * @param $value
@@ -167,6 +167,31 @@ class Finder
             ]);
         }
         switch ($operator) {
+            case 'match':
+                if (is_array($field)) {
+                    if (count($field) > 1) {
+                        $this->query->setParam('bool', [
+                            'must' => [
+                                'multi_match' => [
+                                    'query' => $value,
+                                    'fields' => $field,
+                                ],
+                            ],
+                        ]);
+                    } elseif (count($field) === 1) {
+                        $field = current($field);
+                    }
+                }
+                if (is_string($field)) {
+                    $this->query->setParam('bool', [
+                        'must' => [
+                            'match' => [
+                                $field => $value,
+                            ],
+                        ],
+                    ]);
+                }
+                break;
             case '=':
                 $this->query->setParam('bool', [
                     'must' => [
@@ -224,6 +249,31 @@ class Finder
             ]);
         }
         switch ($operator) {
+            case 'match':
+                if (is_array($field)) {
+                    if (count($field) > 1) {
+                        $this->query->setParam('bool', [
+                            'must' => [
+                                'multi_match' => [
+                                    'query' => $value,
+                                    'fields' => $field,
+                                ],
+                            ],
+                        ]);
+                    } elseif (count($field) === 1) {
+                        $field = current($field);
+                    }
+                }
+                if (is_string($field)) {
+                    $this->query->setParam('bool', [
+                        'must' => [
+                            'match' => [
+                                $field => $value,
+                            ],
+                        ],
+                    ]);
+                }
+                break;
             case '=':
                 $this->query->setParam('bool', [
                     'should' => [

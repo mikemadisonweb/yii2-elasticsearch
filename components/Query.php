@@ -30,8 +30,8 @@ class Query implements QueryInterface
             'term' => [$this, 'setValue'],
             'terms' => [$this, 'setValue'],
             'bool' => [$this, 'appendBool'],
-            'match' => [$this, 'setValue'],
-            'multi_match' => [$this, 'setValue'],
+            'match' => [$this, 'setExclusive'],
+            'multi_match' => [$this, 'setExclusive'],
             'match_all' => [$this, 'setExclusive'],
         ];
     }
