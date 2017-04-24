@@ -150,10 +150,6 @@ class Finder
     public function andWhere($field, $operator, $value)
     {
         $operator = strtolower($operator);
-        if (!is_string($field)) {
-            $field = json_encode($field);
-            throw new \Exception("Field name should be a string, given: {$field}");
-        }
         if (is_array($value)) {
             if ('in' !== $operator) {
                 throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` operator');
@@ -232,10 +228,6 @@ class Finder
     public function orWhere($field, $operator, $value)
     {
         $operator = strtolower($operator);
-        if (!is_string($field)) {
-            $field = json_encode($field);
-            throw new \Exception("Field name should be a string, given: {$field}");
-        }
         if (is_array($value)) {
             if ('in' !== $operator) {
                 throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` operator');
