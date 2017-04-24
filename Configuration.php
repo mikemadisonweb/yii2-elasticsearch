@@ -6,6 +6,10 @@ use Elasticsearch\ClientBuilder;
 use Elasticsearch\ConnectionPool\Selectors\StickyRoundRobinSelector;
 use Elasticsearch\ConnectionPool\StaticNoPingConnectionPool;
 use Elasticsearch\Serializers\SmartSerializer;
+use mikemadisonweb\elasticsearch\components\Finder;
+use mikemadisonweb\elasticsearch\components\Indexer;
+use mikemadisonweb\elasticsearch\components\Percolator;
+use mikemadisonweb\elasticsearch\components\Query;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 
@@ -13,7 +17,6 @@ class Configuration extends Component
 {
     public $clients = [];
     public $indexes = [];
-    public $future = false;
 
     protected $connections = [];
     protected $selectedClient;
@@ -24,6 +27,9 @@ class Configuration extends Component
 
         if (empty($this->clients)) {
             throw new InvalidConfigException('No clients configured for `elasticsearch` component.');
+        }
+        if (empty($this->indexes)) {
+            throw new InvalidConfigException('No indexes configured for `elasticsearch` component.');
         }
     }
 
@@ -37,6 +43,7 @@ class Configuration extends Component
         if (!$clientName) {
             // First one is client by default
             $clientConfig = reset($this->clients);
+            $clientName = key($this->clients);
         } else {
             if (!isset($this->clients[$clientName])) {
                 throw new InvalidConfigException("`{$clientName}` client is not configured.");
@@ -49,10 +56,11 @@ class Configuration extends Component
             return $this->connections[$clientName];
         }
         $clientConfig = $this->applyDefaults($clientConfig, $this->getDefaultClientOptions());
-        $this->selectedClient = ClientBuilder::fromConfig($clientConfig);
-        $this->connections[$clientName] = $this->selectedClient;
+        $this->selectedClient = $clientName;
+        $client = ClientBuilder::fromConfig($clientConfig);
+        $this->connections[$clientName] = $client;
 
-        return $this->selectedClient;
+        return $client;
     }
 
     /**
@@ -63,14 +71,41 @@ class Configuration extends Component
      */
     public function getFinder($indexName, $mapping = '', $clientName = '')
     {
-
         $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
             return $index['index'] === $indexName;
         }));
         $mapping = $this->getDefaultMapping($index, $mapping);
         $client = $this->selectClient($clientName);
+        $finder = \Yii::createObject(Finder::class, [$index, $mapping, $client]);
+        $query = \Yii::createObject(Query::class);
+        $finder->setQuery($query);
 
-        return \Yii::createObject(Finder::class, [$index, $mapping, $client, new Query()]);
+        return $finder;
+    }
+
+    /**
+     * @param $indexName
+     * @param string $mapping
+     * @param string $clientName
+     * @return object
+     */
+    public function getPercolator($indexName, $mapping = '', $clientName = '')
+    {
+        $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
+            return $index['index'] === $indexName;
+        }));
+        $mapping = $this->getDefaultMapping($index, $mapping);
+        $client = $this->selectClient($clientName);
+        if (isset($this->clients[$this->selectedClient]['serializer'])) {
+            $serializerClassName = $this->clients[$this->selectedClient]['serializer'];
+        } else {
+            $serializerClassName = SmartSerializer::class;
+        }
+        $percolator = \Yii::createObject(Percolator::class, [$index, $mapping, $client]);
+        $serializer = \Yii::createObject($serializerClassName);
+        $percolator->setSerializer($serializer);
+
+        return $percolator;
     }
 
     /**
