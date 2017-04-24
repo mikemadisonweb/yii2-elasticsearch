@@ -1,8 +1,8 @@
 {
     "name": "mikemadisonweb/yii2-elasticsearch",
-    "description": "Wrapper based on php-amqplib to incorporate messaging in your Yii2 application via RabbitMQ. Inspired by RabbitMqBundle for Symfony 2, really awesome package.",
+    "description": "Yii2 extension for integration with Elasticsearch version 5.0 and above.",
     "type": "yii2-extension",
-    "keywords": ["yii2","extension","elasticsearch","amqp","message queue","distributed systems"],
+    "keywords": ["yii2","extension","elasticsearch","full-text search","json","api"],
     "license": "MIT",
     "authors": [
         {
