@@ -97,7 +97,7 @@ class Percolator
      * This method using new percolate query
      * @param $documentId
      * @param $documentType
-     * @return array
+     * @return ElasticResponse
      */
     public function percolate($documentId, $documentType)
     {
@@ -114,13 +114,13 @@ class Percolator
         $response = $this->client->search($this->params);
         $this->resetParams();
 
-        return $response;
+        return new ElasticResponse($response);
     }
 
     /**
      * @param array $fields
      * @param $mappingType
-     * @return array
+     * @return ElasticResponse
      */
     public function percolateNonExisting(array $fields, $mappingType)
     {
@@ -133,7 +133,7 @@ class Percolator
         $response = $this->client->search($this->params);
         $this->resetParams();
 
-        return $response;
+        return new ElasticResponse($response);
     }
 
     protected function resetParams()
