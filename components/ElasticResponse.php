@@ -32,6 +32,14 @@ class ElasticResponse implements \Iterator
     /**
      * @return array
      */
+    public function getHits()
+    {
+        return $this->hits;
+    }
+
+    /**
+     * @return array
+     */
     public function getShardInfo()
     {
         return $this->shardInfo;
