@@ -151,16 +151,28 @@ class Finder
     {
         $operator = strtolower($operator);
         if (is_array($value)) {
-            if ('in' !== $operator) {
-                throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` operator');
+            switch($operator) {
+                case 'in':
+                    $this->query->setParam('bool', [
+                        'must' => [
+                            'terms' => [
+                                $field => $value,
+                            ],
+                        ],
+                    ]);
+                    break;
+                case 'not in':
+                    $this->query->setParam('bool', [
+                        'must_not' => [
+                            'terms' => [
+                                $field => $value,
+                            ],
+                        ],
+                    ]);
+                    break;
+                default:
+                    throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` and `NOT IN` operators');
             }
-            $this->query->setParam('bool', [
-                'must' => [
-                    'terms' => [
-                        $field => $value,
-                    ],
-                ],
-            ]);
         }
         switch ($operator) {
             case 'match':
