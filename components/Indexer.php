@@ -97,6 +97,7 @@ class Indexer
         if (!$id) {
             throw new \Exception('You should pass document id in order to delete.');
         }
+        unset($this->params['body']);
         $this->params['id'] = $id;
 
         return $this->client->delete($this->params);
