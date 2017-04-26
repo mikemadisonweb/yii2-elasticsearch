@@ -24,10 +24,9 @@ class Finder
         }
         $this->index = $index;
         $this->mapping = $mapping;
-        $this->resetParams();
         $this->client = $client;
         // default
-        $this->query = new Query();
+        $this->reset();
     }
 
     /**
@@ -336,7 +335,7 @@ class Finder
         unset($this->params['body']);
         $this->params['id'] = $id;
         $response = $this->client->get($this->params);
-        $this->resetParams();
+        $this->reset();
 
         return $response['_source'];
     }
@@ -351,7 +350,7 @@ class Finder
         unset($this->params['body']);
         $this->params['id'] = $id;
         $response = $this->client->exists($this->params);
-        $this->resetParams();
+        $this->reset();
 
         return $response;
     }
@@ -367,8 +366,7 @@ class Finder
 
         $this->applyDefaults();
         $response = $this->client->search($this->params);
-        $this->resetParams();
-        $this->query->reset();
+        $this->reset();
 
         return new ElasticResponse($response);
     }
@@ -385,8 +383,7 @@ class Finder
         unset($this->params['size']);
         unset($this->params['sort']);
         $response = $this->client->count($this->params);
-        $this->resetParams();
-        $this->query->reset();
+        $this->reset();
 
         return $response['count'];
     }
@@ -435,12 +432,20 @@ class Finder
         }
     }
 
-    protected function resetParams()
+    /**
+     * Reset all query parameters to build next request
+     */
+    protected function reset()
     {
         $this->params = [
             'index' => $this->index['index'],
             'type' => $this->mapping,
             'body' => null,
         ];
+        if (null === $this->query) {
+            $this->query = new Query();
+        } else {
+            $this->query->reset();
+        }
     }
 }
