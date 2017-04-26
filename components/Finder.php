@@ -401,6 +401,23 @@ class Finder
     }
 
     /**
+     * Reset all query parameters to build next request
+     */
+    public function reset()
+    {
+        $this->params = [
+            'index' => $this->index['index'],
+            'type' => $this->mapping,
+            'body' => null,
+        ];
+        if (null === $this->query) {
+            $this->query = new Query();
+        } else {
+            $this->query->reset();
+        }
+    }
+
+    /**
      * todo Take this mess to Defaults class and validate configuration
      */
     private function applyDefaults()
@@ -429,23 +446,6 @@ class Finder
                     $this->params['body']['highlight']['post_tags'] = $this->index['defaults']['highlight']['post_tags'];
                 }
             }
-        }
-    }
-
-    /**
-     * Reset all query parameters to build next request
-     */
-    protected function reset()
-    {
-        $this->params = [
-            'index' => $this->index['index'],
-            'type' => $this->mapping,
-            'body' => null,
-        ];
-        if (null === $this->query) {
-            $this->query = new Query();
-        } else {
-            $this->query->reset();
         }
     }
 }
