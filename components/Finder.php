@@ -182,6 +182,8 @@ class Finder
                                 'multi_match' => [
                                     'query' => $value,
                                     'fields' => $field,
+                                    'type' => 'cross_fields',
+                                    'operator' => 'and',
                                 ],
                             ],
                         ]);
@@ -193,7 +195,11 @@ class Finder
                     $this->query->setParam('bool', [
                         'must' => [
                             'match' => [
-                                $field => $value,
+                                $field => [
+                                    'query' => $value,
+                                    'type' => 'cross_fields',
+                                    'operator' => 'and',
+                                ],
                             ],
                         ],
                     ]);
@@ -263,6 +269,8 @@ class Finder
                                 'multi_match' => [
                                     'query' => $value,
                                     'fields' => $field,
+                                    'type' => 'cross_fields',
+                                    'operator' => 'and',
                                 ],
                             ],
                         ]);
@@ -274,7 +282,11 @@ class Finder
                     $this->query->setParam('bool', [
                         'must' => [
                             'match' => [
-                                $field => $value,
+                                $field => [
+                                    'query' => $value,
+                                    'type' => 'cross_fields',
+                                    'operator' => 'and',
+                                ],
                             ],
                         ],
                     ]);
