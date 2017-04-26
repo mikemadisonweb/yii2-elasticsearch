@@ -8,10 +8,15 @@ use yii\console\Controller;
 
 class IndexController extends Controller
 {
+    public $interactive = true;
+
     /**
      * @var BaseConsole
      */
     protected $console;
+    protected $options = [
+        'i' => 'interactive',
+    ];
 
     /**
      * IndexController constructor.
@@ -26,6 +31,15 @@ class IndexController extends Controller
     }
 
     /**
+     * @param string $actionID
+     * @return array
+     */
+    public function options($actionID)
+    {
+        return array_merge(parent::options($actionID), array_values($this->options));
+    }
+
+    /**
      * Create one or more indexes on server (enter comma separated index names)
      * @param string $indexNames
      */
@@ -33,7 +47,7 @@ class IndexController extends Controller
     {
         $search = \Yii::$app->elasticsearch;
         $confirm = $this->confirm('Warning! Existing indexes will be dropped and recreated, are you sure you want to proceed?');
-        if ($confirm) {
+        if ($confirm || !$this->interactive) {
             if ($indexNames) {
                 $indexNames = explode(',', $indexNames);
                 foreach ($indexNames as $indexName) {
@@ -57,7 +71,7 @@ class IndexController extends Controller
     {
         $search = \Yii::$app->elasticsearch;
         $confirm = $this->confirm('Warning! Indexes will be dropped and all data inside them will be lost, are you sure you want to proceed?');
-        if ($confirm) {
+        if ($confirm || !$this->interactive) {
             if ($indexNames) {
                 $indexNames = explode(',', $indexNames);
                 foreach ($indexNames as $indexName) {
