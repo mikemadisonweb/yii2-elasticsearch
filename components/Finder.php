@@ -197,7 +197,6 @@ class Finder
                             'match' => [
                                 $field => [
                                     'query' => $value,
-                                    'type' => 'cross_fields',
                                     'operator' => 'and',
                                 ],
                             ],
@@ -284,7 +283,6 @@ class Finder
                             'match' => [
                                 $field => [
                                     'query' => $value,
-                                    'type' => 'cross_fields',
                                     'operator' => 'and',
                                 ],
                             ],
