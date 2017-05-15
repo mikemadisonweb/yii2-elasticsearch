@@ -36,9 +36,11 @@ class BoolBuilder
             $parsedCondition->setCondition(ConditionParser::AND_CONDITION_TOKEN);
         }
 
-        $queryParams = $this->build($parsedCondition);
-        foreach ($queryParams as $keyword => $param) {
-            $query->appendParam($keyword, $param);
+        $conditionParams = $this->build($parsedCondition);
+        foreach ($conditionParams as $keyword => $queryParams) {
+            foreach ($queryParams as $param) {
+                $query->appendParam($keyword, $param);
+            }
         }
 
         return $query;
