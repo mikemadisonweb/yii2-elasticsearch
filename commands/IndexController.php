@@ -1,11 +1,15 @@
 <?php
 
-namespace mikemadisonweb\elasticsearch\commands;
+namespace mikemadisonweb\elasticsearch\components\commands;
 
 use yii\base\Module;
 use yii\helpers\BaseConsole;
 use yii\console\Controller;
 
+/**
+ * Manipulations with Elasticsearch indices based on configuration
+ * @package mikemadisonweb\elasticsearch\components\commands
+ */
 class IndexController extends Controller
 {
     public $interactive = true;

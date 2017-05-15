@@ -1,11 +1,11 @@
 <?php
 
-namespace mikemadisonweb\elasticsearch\components;
+namespace mikemadisonweb\elasticsearch\components\responses;
 
 /**
- * Class ElasticResponse
+ * Class FinderResponse
  */
-class ElasticResponse implements \Iterator
+class FinderResponse extends ElasticResponse implements \Iterator
 {
     public $executionTime;
     public $isTimedOut;
@@ -13,20 +13,20 @@ class ElasticResponse implements \Iterator
     public $maxScore;
 
     protected $hits;
-    protected $shardInfo;
 
     /**
-     * ElasticResponse constructor.
+     * FinderResponse constructor.
      * @param array $response
      */
     public function __construct(array $response)
     {
         $this->executionTime = $response['took'];
         $this->isTimedOut = $response['timed_out'];
-        $this->shardInfo = $response['_shards'];
         $this->hits = $response['hits']['hits'];
         $this->total = $response['hits']['total'];
         $this->maxScore = $response['hits']['max_score'];
+
+        parent::__construct($response);
     }
 
     /**
@@ -35,14 +35,6 @@ class ElasticResponse implements \Iterator
     public function getHits()
     {
         return $this->hits;
-    }
-
-    /**
-     * @return array
-     */
-    public function getShardInfo()
-    {
-        return $this->shardInfo;
     }
 
     public function rewind()

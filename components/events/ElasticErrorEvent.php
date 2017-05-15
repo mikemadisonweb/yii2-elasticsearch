@@ -1,6 +1,6 @@
 <?php
 
-namespace mikemadisonweb\elasticsearch\components;
+namespace mikemadisonweb\elasticsearch\components\events;
 
 use yii\base\Event as BaseEvent;
 

@@ -2,6 +2,11 @@
 
 namespace mikemadisonweb\elasticsearch\components;
 
+use mikemadisonweb\elasticsearch\components\builders\BoolBuilder;
+use mikemadisonweb\elasticsearch\components\conditions\ConditionParser;
+use mikemadisonweb\elasticsearch\components\queries\BoolQuery;
+use mikemadisonweb\elasticsearch\components\queries\QueryInterface;
+use mikemadisonweb\elasticsearch\components\responses\FinderResponse;
 use Elasticsearch\Client;
 use yii\base\InvalidConfigException;
 
@@ -16,6 +21,10 @@ class Finder
      */
     protected $query;
     protected $mapping;
+    /**
+     * @var DefaultsResolver
+     */
+    protected $defaultsResolver;
 
     public function __construct($index, $mapping, Client $client)
     {
@@ -26,6 +35,10 @@ class Finder
         $this->mapping = $mapping;
         $this->client = $client;
         // default
+        $this->conditionBuilder = new BoolBuilder(new ConditionParser());
+        if (isset($this->index['defaults'])) {
+            $this->defaultsResolver = new DefaultsResolver($this->index['defaults']);
+        }
         $this->reset();
     }
 
@@ -112,227 +125,52 @@ class Finder
 
     /**
      * Full-text searches
-     * @param $fields
      * @param $query
-     * @return ElasticResponse
-     * @throws \Exception
+     * @param string $fields
+     * @param string $condition
+     * @param string $operator
+     * @param string $type
+     * @return $this
      */
-    public function match($query, $fields = '_all')
+    public function match($query, $fields = '_all', $condition = 'must', $operator = 'and', $type = 'cross_fields')
     {
         if (is_array($fields)) {
             if (count($fields) > 1) {
-                $this->query->setParam('multi_match', [
-                    'query' => $query,
-                    'fields' => $fields,
+                $this->query->appendParam($condition, [
+                    'multi_match' => [
+                        'query' => $query,
+                        'fields' => $fields,
+                        'type' => $type,
+                        'operator' => $operator,
+                    ],
                 ]);
             } elseif (count($fields) === 1) {
                 $fields = current($fields);
             }
         }
         if (is_string($fields)) {
-            $this->query->setParam('match', [
-                $fields => $query,
+            $this->query->appendParam($condition, [
+                'match' => [
+                    $fields => [
+                        'query' => $query,
+                        'operator' => $operator,
+                    ],
+                ],
             ]);
         }
 
-        return $this->all();
+        return $this;
     }
 
     /**
-     * todo() Rewrite as query SQL-like syntax string parsing (nested logic not supported right now)
-     * @param $field
-     * @param $operator
-     * @param $value
+     * @param string $expression
      * @return $this
-     * @throws \Exception
      */
-    public function andWhere($field, $operator, $value)
+    public function where($expression)
     {
-        $operator = strtolower($operator);
-        if (is_array($value)) {
-            switch($operator) {
-                case 'in':
-                    $this->query->setParam('bool', [
-                        'must' => [
-                            'terms' => [
-                                $field => $value,
-                            ],
-                        ],
-                    ]);
-                    break;
-                case 'not in':
-                    $this->query->setParam('bool', [
-                        'must_not' => [
-                            'terms' => [
-                                $field => $value,
-                            ],
-                        ],
-                    ]);
-                    break;
-                default:
-                    throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` and `NOT IN` operators');
-            }
-        }
-        switch ($operator) {
-            case 'match':
-                if (is_array($field)) {
-                    if (count($field) > 1) {
-                        $this->query->setParam('bool', [
-                            'must' => [
-                                'multi_match' => [
-                                    'query' => $value,
-                                    'fields' => $field,
-                                    'type' => 'cross_fields',
-                                    'operator' => 'and',
-                                ],
-                            ],
-                        ]);
-                    } elseif (count($field) === 1) {
-                        $field = current($field);
-                    }
-                }
-                if (is_string($field)) {
-                    $this->query->setParam('bool', [
-                        'must' => [
-                            'match' => [
-                                $field => [
-                                    'query' => $value,
-                                    'operator' => 'and',
-                                ],
-                            ],
-                        ],
-                    ]);
-                }
-                break;
-            case '=':
-                $this->query->setParam('bool', [
-                    'must' => [
-                        'term' => [
-                            $field => $value,
-                        ],
-                    ],
-                ]);
-                break;
-            case '!=':
-                $this->query->setParam('bool', [
-                    'must_not' => [
-                        'term' => [
-                            $field => $value,
-                        ],
-                    ],
-                ]);
-                break;
-            case 'gt':
-            case 'gte':
-            case 'lt':
-            case 'lte':
-                $this->query->setParam('bool', [
-                    'must' => [
-                        'range' => [
-                            $field => [
-                                $operator => $value,
-                            ],
-                        ],
-                    ],
-                ]);
-                break;
-        }
+        $this->query = $this->conditionBuilder->buildQuery($this->query, $expression);
 
         return $this;
-    }
-
-    public function orWhere($field, $operator, $value)
-    {
-        $operator = strtolower($operator);
-        if (is_array($value)) {
-            switch($operator) {
-                case 'in':
-                    $this->query->setParam('bool', [
-                        'should' => [
-                            'terms' => [
-                                $field => $value,
-                            ],
-                        ],
-                    ]);
-                    break;
-                default:
-                    throw new \Exception('Where clause misconfigured. Array values allowed only with `IN` and `NOT IN` operators');
-            }
-        }
-        switch ($operator) {
-            case 'match':
-                if (is_array($field)) {
-                    if (count($field) > 1) {
-                        $this->query->setParam('bool', [
-                            'must' => [
-                                'multi_match' => [
-                                    'query' => $value,
-                                    'fields' => $field,
-                                    'type' => 'cross_fields',
-                                    'operator' => 'and',
-                                ],
-                            ],
-                        ]);
-                    } elseif (count($field) === 1) {
-                        $field = current($field);
-                    }
-                }
-                if (is_string($field)) {
-                    $this->query->setParam('bool', [
-                        'must' => [
-                            'match' => [
-                                $field => [
-                                    'query' => $value,
-                                    'operator' => 'and',
-                                ],
-                            ],
-                        ],
-                    ]);
-                }
-                break;
-            case '=':
-                $this->query->setParam('bool', [
-                    'should' => [
-                        'term' => [
-                            $field => $value,
-                        ],
-                    ],
-                ]);
-                break;
-            case '!=':
-                $this->query->setParam('bool', [
-                    'must_not' => [
-                        'term' => [
-                            $field => $value,
-                        ],
-                    ],
-                ]);
-                break;
-            case 'gt':
-            case 'gte':
-            case 'lt':
-            case 'lte':
-                $this->query->setParam('bool', [
-                    'should' => [
-                        'range' => [
-                            $field => [
-                                $operator => $value,
-                            ],
-                        ],
-                    ],
-                ]);
-                break;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param $query
-     */
-    public function query($query)
-    {
-        $this->params['body']['query'] = $query;
     }
 
     /**
@@ -366,7 +204,7 @@ class Finder
     }
 
     /**
-     * @return ElasticResponse
+     * @return FinderResponse
      */
     public function all()
     {
@@ -374,11 +212,11 @@ class Finder
             $this->params['body']['query'] = $this->query->build();
         }
 
-        $this->applyDefaults();
+        $this->params = $this->defaultsResolver->resolve($this->params);
         $response = $this->client->search($this->params);
         $this->reset();
 
-        return new ElasticResponse($response);
+        return new FinderResponse($response);
     }
 
     /**
@@ -400,14 +238,14 @@ class Finder
 
     /**
      * @param $json
-     * @return ElasticResponse
+     * @return FinderResponse
      */
     public function sendJson($json)
     {
         $this->params['body'] = $json;
         $response = $this->client->search($this->params);
 
-        return new ElasticResponse($response);
+        return new FinderResponse($response);
     }
 
     /**
@@ -421,41 +259,9 @@ class Finder
             'body' => null,
         ];
         if (null === $this->query) {
-            $this->query = new Query();
+            $this->query = new BoolQuery();
         } else {
             $this->query->reset();
-        }
-    }
-
-    /**
-     * todo Take this mess to Defaults class and validate configuration
-     */
-    private function applyDefaults()
-    {
-        if (!isset($this->params['sort']) && isset($this->index['defaults']['sort'])) {
-            $this->params['sort'] = $this->index['defaults']['sort'];
-        }
-
-        if (!isset($this->params['size']) && isset($this->index['defaults']['limit'])) {
-            $this->params['size'] = $this->index['defaults']['limit'];
-        }
-
-        if (!isset($this->params['body']['highlight']) && isset($this->index['defaults']['highlight'])) {
-            if (isset($this->index['defaults']['highlight']['enabled']) && $this->index['defaults']['highlight']['enabled']) {
-                if (isset($this->index['defaults']['highlight']['fields'])) {
-                    $this->params['body']['highlight']['fields'] = $this->index['defaults']['highlight']['fields'];
-                } else {
-                    $this->params['body']['highlight']['fields'] = ['*' => ['number_of_fragments' => 0]];
-                }
-
-                if (isset($this->index['defaults']['highlight']['pre_tags'])) {
-                    $this->params['body']['highlight']['pre_tags'] = $this->index['defaults']['highlight']['pre_tags'];
-                }
-
-                if (isset($this->index['defaults']['highlight']['post_tags'])) {
-                    $this->params['body']['highlight']['post_tags'] = $this->index['defaults']['highlight']['post_tags'];
-                }
-            }
         }
     }
 }

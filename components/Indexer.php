@@ -2,9 +2,11 @@
 
 namespace mikemadisonweb\elasticsearch\components;
 
+use mikemadisonweb\elasticsearch\components\events\ElasticErrorEvent;
+use mikemadisonweb\elasticsearch\components\responses\IndexerResponse;
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
 use yii\base\InvalidConfigException;
-use yii\db\Exception;
 
 class Indexer
 {
@@ -25,21 +27,17 @@ class Indexer
         if (!isset($index['index'])) {
             throw new InvalidConfigException('Index name is not configured.');
         }
-        $this->index    = $index;
+        $this->index = $index;
         $this->mapping = $mapping;
-        $this->params = [
-            'index' => $this->index['index'],
-            'type' => $mapping,
-            'body' => null,
-        ];
-        $this->client   = $client;
+        $this->resetParams();
+        $this->client = $client;
     }
 
 
     /**
      * @param array $fields
      * @param string $id
-     * @return array
+     * @return IndexerResponse
      * @throws \Exception
      */
     public function insert(array $fields, $id = '')
@@ -54,8 +52,10 @@ class Indexer
         if ('' !== $id) {
             $this->params['id'] = $id;
         }
+        $response = $this->client->index($this->params);
+        $this->resetParams();
 
-        return $this->client->index($this->params);
+        return new IndexerResponse($response);
     }
 
     /**
@@ -64,7 +64,7 @@ class Indexer
      * @param array $upsert
      * @param string $script
      * @param array $scriptParams
-     * @return array
+     * @return IndexerResponse
      * @throws \Exception
      */
     public function update(array $fields, $id, array $upsert = [], $script = '', array $scriptParams = [])
@@ -83,24 +83,38 @@ class Indexer
 
         $this->params['id'] = $id;
         $this->params['body'] = $body;
+        $response = $this->client->update($this->params);
+        $this->resetParams();
 
-        return $this->client->update($this->params);
+        return new IndexerResponse($response);
     }
 
     /**
      * @param $id
-     * @return array
+     * @param bool $ignoreMissing
+     * @return IndexerResponse|bool
      * @throws \Exception
      */
-    public function delete($id)
+    public function delete($id, $ignoreMissing = false)
     {
         if (!$id) {
             throw new \Exception('You should pass document id in order to delete.');
         }
         unset($this->params['body']);
         $this->params['id'] = $id;
+        try {
+            $response = $this->client->delete($this->params);
+        } catch (Missing404Exception $e) {
+            if (!$ignoreMissing) {
+                throw new Missing404Exception($e->getMessage());
+            }
 
-        return $this->client->delete($this->params);
+            return false;
+        }
+
+        $this->resetParams();
+
+        return new IndexerResponse($response);
     }
 
     /**
@@ -146,6 +160,8 @@ class Indexer
             }
         }
 
+        $this->resetParams();
+
         return $response;
     }
 
@@ -161,5 +177,14 @@ class Indexer
         }
 
         return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    protected function resetParams()
+    {
+        $this->params = [
+            'index' => $this->index['index'],
+            'type' => $this->mapping,
+            'body' => null,
+        ];
     }
 }

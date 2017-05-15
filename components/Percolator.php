@@ -2,6 +2,9 @@
 
 namespace mikemadisonweb\elasticsearch\components;
 
+use mikemadisonweb\elasticsearch\components\queries\QueryInterface;
+use mikemadisonweb\elasticsearch\components\responses\FinderResponse;
+use mikemadisonweb\elasticsearch\components\responses\IndexerResponse;
 use Elasticsearch\Client;
 use Elasticsearch\Serializers\SerializerInterface;
 use Elasticsearch\Serializers\SmartSerializer;
@@ -21,11 +24,6 @@ class Percolator
      * @var SerializerInterface
      */
     protected $serializer;
-
-    /**
-     * @var QueryInterface
-     */
-    protected $query;
 
     /**
      * @var Client
@@ -72,7 +70,7 @@ class Percolator
     /**
      * @param QueryInterface $query
      * @param string $id
-     * @return array
+     * @return IndexerResponse
      * @throws \Exception
      */
     public function insert(QueryInterface $query, $id = '')
@@ -89,7 +87,7 @@ class Percolator
         $response = $this->client->index($this->params);
         $this->resetParams();
 
-        return $response;
+        return new IndexerResponse($response);
     }
 
     /**
@@ -97,7 +95,7 @@ class Percolator
      * This method using new percolate query
      * @param $documentId
      * @param $documentType
-     * @return ElasticResponse
+     * @return FinderResponse
      */
     public function percolate($documentId, $documentType)
     {
@@ -114,13 +112,13 @@ class Percolator
         $response = $this->client->search($this->params);
         $this->resetParams();
 
-        return new ElasticResponse($response);
+        return new FinderResponse($response);
     }
 
     /**
      * @param array $fields
      * @param $mappingType
-     * @return ElasticResponse
+     * @return FinderResponse
      */
     public function percolateNonExisting(array $fields, $mappingType)
     {
@@ -133,7 +131,7 @@ class Percolator
         $response = $this->client->search($this->params);
         $this->resetParams();
 
-        return new ElasticResponse($response);
+        return new FinderResponse($response);
     }
 
     protected function resetParams()

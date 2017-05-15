@@ -9,7 +9,7 @@ use Elasticsearch\Serializers\SmartSerializer;
 use mikemadisonweb\elasticsearch\components\Finder;
 use mikemadisonweb\elasticsearch\components\Indexer;
 use mikemadisonweb\elasticsearch\components\Percolator;
-use mikemadisonweb\elasticsearch\components\Query;
+use mikemadisonweb\elasticsearch\components\queries\Query;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 
@@ -77,8 +77,6 @@ class Configuration extends Component
         $mapping = $this->getDefaultMapping($index, $mapping);
         $client = $this->selectClient($clientName);
         $finder = \Yii::createObject(Finder::class, [$index, $mapping, $client]);
-        $query = \Yii::createObject(Query::class);
-        $finder->setQuery($query);
 
         return $finder;
     }
