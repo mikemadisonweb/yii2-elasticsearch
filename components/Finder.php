@@ -169,6 +169,7 @@ class Finder
     public function where($expression)
     {
         $this->query = $this->conditionBuilder->buildQuery($this->query, $expression);
+        $this->query->setParam('minimum_should_match', '0<1');
 
         return $this;
     }

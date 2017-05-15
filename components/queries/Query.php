@@ -29,18 +29,12 @@ class Query implements QueryInterface
 
     /**
      * @param $name
-     * @param $value
+     * @param array $parameters
      */
-    public function appendParam($name, $value)
+    public function appendParam($name, $parameters)
     {
         $this->validate($name);
-        if (is_array($value) && count($value) > 1) {
-            foreach ($value as $key => $item) {
-                $this->params[$name][] = $item;
-            }
-        } else {
-            $this->params[$name][] = $value;
-        }
+        $this->params[$name][] = $parameters;
     }
 
     /**
