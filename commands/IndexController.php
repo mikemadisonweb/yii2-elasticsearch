@@ -1,6 +1,6 @@
 <?php
 
-namespace mikemadisonweb\elasticsearch\components\commands;
+namespace mikemadisonweb\elasticsearch\commands;
 
 use yii\base\Module;
 use yii\helpers\BaseConsole;

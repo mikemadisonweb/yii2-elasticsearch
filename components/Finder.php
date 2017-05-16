@@ -8,6 +8,7 @@ use mikemadisonweb\elasticsearch\components\queries\BoolQuery;
 use mikemadisonweb\elasticsearch\components\queries\QueryInterface;
 use mikemadisonweb\elasticsearch\components\responses\FinderResponse;
 use Elasticsearch\Client;
+use mikemadisonweb\elasticsearch\components\responses\IndexerResponse;
 use yii\base\InvalidConfigException;
 
 class Finder
@@ -131,9 +132,21 @@ class Finder
      * @param string $operator
      * @param string $type
      * @return $this
+     * @throws \Exception
      */
-    public function match($query, $fields = '_all', $condition = 'must', $operator = 'and', $type = 'cross_fields')
+    public function match($query, $fields = '_all', $condition = 'and', $operator = 'and', $type = 'cross_fields')
     {
+        switch ($condition) {
+            case 'and':
+                $condition = 'must';
+                break;
+            case 'or':
+                $condition = 'should';
+                break;
+            default:
+                throw new \Exception('You should pass one of the following conditions: `or`, `and`');
+        }
+
         if (is_array($fields)) {
             if (count($fields) > 1) {
                 $this->query->appendParam($condition, [
