@@ -80,11 +80,15 @@ class Expression extends ConditionItem
         if (null === $this->getOperator()) {
             throw new \LogicException("Condition parsing error: comparison operator expected, got `{$value}`");
         }
-        if (ConditionParser::IN_OPERATOR_TOKEN === $this->getOperator() && !is_array($value)) {
-            throw new \LogicException("Condition parsing error: array is expected after IN operator, got `{$value}`");
-        }
-        if (ConditionParser::IN_OPERATOR_TOKEN !== $this->getOperator() && is_array($value)) {
-            throw new \LogicException("Condition parsing error: array should be only after IN operator, got `{$value}`");
+        if (in_array($this->getOperator(), [ConditionParser::IN_OPERATOR_TOKEN, ConditionParser::NOT_IN_OPERATOR_TOKEN])) {
+            if (!is_array($value)) {
+                throw new \LogicException("Condition parsing error: array is expected after IN operator, got `{$value}`");
+            }
+        } else {
+            if (is_array($value)) {
+                $value = json_encode($value);
+                throw new \LogicException("Condition parsing error: array should be only after IN operator, got `{$value}`");
+            }
         }
         $this->value = $value;
     }
