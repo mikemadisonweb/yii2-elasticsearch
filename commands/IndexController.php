@@ -8,7 +8,7 @@ use yii\console\Controller;
 
 /**
  * Manipulations with Elasticsearch indices based on configuration
- * @package mikemadisonweb\elasticsearch\components\commands
+ * @package mikemadisonweb\elasticsearch\commands
  */
 class IndexController extends Controller
 {

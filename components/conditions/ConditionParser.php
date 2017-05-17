@@ -172,6 +172,7 @@ class ConditionParser
                     }
                     break;
                 case self::IN_OPERATOR_TOKEN:
+                case self::NOT_IN_OPERATOR_TOKEN:
                 case self::EQUAL_OPERATOR_TOKEN:
                 case self::NON_EQUAL_OPERATOR_TOKEN:
                 case self::GT_OPERATOR:
