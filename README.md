@@ -103,7 +103,7 @@ After you specify the name of the index and the client using this index, you nee
 When you insert new document each field is processed based on it's [datatype](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/mapping-types.html). For example, `text` datatype is needed to index full-text values (these values are analyzed) and `keyword` is searchable by their exact value, which is useful for filtering or aggregations. Please note that if you want to store an array, there is no need to explicitly define `array` datatype, you can store an array of integers in `integer` datatype.
 
 By default Elasticsearch store incoming documents upon indexing, when you retrieve search results for it, you will find the original content in [_source](https://www.elastic.co/search?q=_source&section=Docs%2FElasticsearch%2FReference%2F5.4) field. You can disable that behavior by setting parameter in mapping config:
-```
+```php
 '_source' => [
     'enabled' => true
 ],
@@ -169,7 +169,7 @@ $finder = \Yii::$app->elasticsearch->getFinder('my-blog', 'posts');
 $results = $finder
     ->match('How to use Elasticsearch', 'title')
     ->where('category_id = 14')
-    ->sort('post_date:desc)
+    ->sort('post_date:desc')
     ->limit(100)
     ->offset(100)
     ->all();
@@ -179,7 +179,7 @@ foreach ($results as $result) {
 }
 ```
 Please note that if you use analyzed filed(full-text field) in `where()` method you will probably get wrong results because that method should be used only for non-analyzed datatypes(keyword, integer, boolean etc). There is optional parameters in `match()` method that you most certainly should keep eye on:
-```
+```php
 Finder match(string $query, array|string $fields = '_all', string $condition = 'and', string $operator = 'and', string $type = 'cross_fields')
 ```
 Most of the times you would need to match query string to particular fields, but if you want to search different strings in different fields (e.g. 'some text' on 'title' and/or 'another data' on 'post') then you can choose logical operator in `condition` parameter for your needs. If you searching on multiple fields you can define `operator` and `type` parameters to specify the [logic for searching on these fields](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-multi-match-query.html).
