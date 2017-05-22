@@ -90,7 +90,7 @@ class Indexer
     }
 
     /**
-     * @param $id
+     * @param string $id
      * @param bool $ignoreMissing
      * @return IndexerResponse|bool
      * @throws \Exception
