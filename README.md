@@ -167,6 +167,7 @@ There are also ways to filter the results, sort them or select specific portion 
 ```php
 $finder = \Yii::$app->elasticsearch->getFinder('my-blog', 'posts');
 $results = $finder
+    ->select(['title', 'post'])
     ->match('How to use Elasticsearch', 'title')
     ->where('category_id = 14')
     ->sort('post_date:desc')
