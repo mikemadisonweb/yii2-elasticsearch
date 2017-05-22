@@ -167,7 +167,7 @@ There are also ways to filter the results, sort them or select specific portion 
 ```php
 $finder = \Yii::$app->elasticsearch->getFinder('my-blog', 'posts');
 $results = $finder
-    ->select(['title', 'post'])
+    ->select(['title', 'body'])
     ->match('How to use Elasticsearch', 'title')
     ->where('category_id = 14')
     ->sort('post_date:desc')
@@ -183,7 +183,7 @@ Please note that if you use analyzed filed(full-text field) in `where()` method 
 ```php
 Finder match(string $query, array|string $fields = '_all', string $condition = 'and', string $operator = 'and', string $type = 'cross_fields')
 ```
-Most of the times you would need to match query string to particular fields, but if you want to search different strings in different fields (e.g. 'some text' on 'title' and/or 'another data' on 'post') then you can choose logical operator in `condition` parameter for your needs. If you searching on multiple fields you can define `operator` and `type` parameters to specify the [logic for searching on these fields](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-multi-match-query.html).
+Most of the times you would need to match query string to particular fields, but if you want to search different strings in different fields (e.g. 'some text' on 'title' and/or 'another data' on 'body') then you can choose logical operator in `condition` parameter for your needs. If you searching on multiple fields you can define `operator` and `type` parameters to specify the [logic for searching on these fields](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-multi-match-query.html).
 
 More complex filter causes can be specified in a SQL-like fashion:
 ```php
@@ -197,7 +197,7 @@ If by any chance you feel limited to Finder methods you can pass raw JSON and in
 $json = '{
     "query" : {
         "match" : {
-            "post" : "Most important things in life"
+            "body" : "Most important things in life"
         }
     }
 }';
