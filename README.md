@@ -4,7 +4,7 @@ Yii2 extension for integration with Elasticsearch version 5.0 and above, based o
 
 Elasticsearch 5.0 came out with a bunch of [new features and improvements](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/es-release-notes.html) which is intriguing. Sadly, but Yii2 official extension support is limited to versions from 1.0 to 2.4.
 
-Compared to [elasticsearch-php](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html) this extension has more intuitive way of doing things, like index documents, search, percolate (reverse search), building complex filter conditions using simple SQL-like language. Also it's highly configurable and extensible, it's not tightly tied to ActiveRecord models, but this can be easily implemented.
+Compared to [elasticsearch-php](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html) this extension has more intuitive way of doing things, like index documents, search, percolate (reverse search), building complex filter conditions using simple SQL-like language. Also, it's highly configurable and extensible, it's not tightly tied to ActiveRecord models, but this can be easily implemented.
 
 The documentation is relevant for the latest stable version of the application.
 
@@ -27,7 +27,7 @@ to the require section of your `composer.json` file.
 
 Configuration
 -------------
-Lets suppose that you have huge database of blog posts and you want to use full-text search on title and body fields, also search for keywords as is and maybe filter by categories and tags:
+Let's suppose that you have a huge database of blog posts and you want to use full-text search on title and body fields, also search for keywords as is and maybe filter by categories and tags:
 ```php
 <?php
 // config/main.php
@@ -96,11 +96,11 @@ return [
 ```
 You can configure multiple elasticsearch clients if you need. This could be different search clusters used by your application. Each client can be defined as multiple `hosts`, this parameter contains list of hosts or ip addresses of your elasticsearch servers, optionally followed by a port(default is 9200). You can find more options in [elasticsearch-php documentation](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html). By default connection to either one of these servers is calculated using round-robin strategy.
 
-Consider your needs on performance and durability when selecting the [number of shards and replicas](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/indices-create-index.html). Right amount of these parameters is a compromise between those characteristics. Above example uses the default number of shards and replicas, so if that is what you want, you can omit this parameters in configuration.
+Consider your needs on performance and durability when selecting the [number of shards and replicas](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/indices-create-index.html). The right amount of these parameters is a compromise between those characteristics. Above example uses the default number of shards and replicas, so if that is what you want, you can omit these parameters in configuration.
 
-After you specify the name of the index and the client using this index, you need to specify the fields that are required for the search. These fields can be grouped into mappings the way you find it logical and convenient to search for(e.g. 'posts'). In terms of full-text search any single piece of data that you add to index called a document. Easy way to understand the meaning of the mapping is to think of it as a document type. By default Elasticsearch don't force you to provide that kind of schema for you data, so if your document has more fields then listed in mapping, those ne fields would be stored as well eithout any problems. To change that behaviour you can set `dynamic` to `strict`, unspecified fields upon insert will raise in an error then.
+After you specify the name of the index and the client using this index, you need to specify the fields that are required for the search. These fields can be grouped into mappings the way you find it logical and convenient to search for(e.g. 'posts'). In terms of full-text search, any single piece of data that you add to an index called a document. An easy way to understand the meaning of the mapping is to think of it as a document type. By default, Elasticsearch doesn't force you to provide that kind of schema for your data, so if your document has more fields than listed in mapping, those new fields would be stored as well without any problems. To change that behavior you can set `dynamic` to `strict`, unspecified fields upon insert will raise an error then.
 
-When you insert new document each field is processed based on it's [datatype](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/mapping-types.html). For example, `text` datatype is needed to index full-text values (these values are analyzed) and `keyword` is searchable by their exact value, which is useful for filtering or aggregations. Please note that if you want to store an array, there is no need to explicitly define `array` datatype, you can store array of intergers in `integer` datatype.
+When you insert new document each field is processed based on it's [datatype](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/mapping-types.html). For example, `text` datatype is needed to index full-text values (these values are analyzed) and `keyword` is searchable by their exact value, which is useful for filtering or aggregations. Please note that if you want to store an array, there is no need to explicitly define `array` datatype, you can store an array of integers in `integer` datatype.
 
 By default Elasticsearch store incoming documents upon indexing, when you retrieve search results for it, you will find the original content in [_source](https://www.elastic.co/search?q=_source&section=Docs%2FElasticsearch%2FReference%2F5.4) field. You can disable that behavior by setting parameter in mapping config:
 ```
@@ -178,11 +178,11 @@ foreach ($results as $result) {
     // ...
 }
 ```
-Please note that if you use analyzed filed(full-text field) in `where()` method you will probably get wrong results, because that method should be used only for non-analyzed datatypes(keyword, integer, boolean etc). There are optional parameters in `match()` method that you most certainly should keep eye on:
+Please note that if you use analyzed filed(full-text field) in `where()` method you will probably get wrong results because that method should be used only for non-analyzed datatypes(keyword, integer, boolean etc). There is optional parameters in `match()` method that you most certainly should keep eye on:
 ```
 Finder match(string $query, array|string $fields = '_all', string $condition = 'and', string $operator = 'and', string $type = 'cross_fields')
 ```
-Most of the times you would need to match query string to particular fields, but if you want to search different strings on different fields (e.g. 'some text' on 'title' and/or 'another data' on 'post') then you can choose logical operator in `condition` parameter for your needs. If you searching on multiple fields you can define `operator` and `type` parameters to specify the [logic for searching on these fields](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-multi-match-query.html).
+Most of the times you would need to match query string to particular fields, but if you want to search different strings in different fields (e.g. 'some text' on 'title' and/or 'another data' on 'post') then you can choose logical operator in `condition` parameter for your needs. If you searching on multiple fields you can define `operator` and `type` parameters to specify the [logic for searching on these fields](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/query-dsl-multi-match-query.html).
 
 More complex filter causes can be specified in a SQL-like fashion:
 ```php
@@ -205,9 +205,9 @@ $results = $finder->sendJson($json);
 ```
 Analysis
 -------------
-There is a huge amount of options Elasticearch provides for analyzing text. Alalyzers, normalizers, token filters are out of the scope of this documentation, you can find loads of information about them in [official docs](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/analysis.html).
+There is a huge amount of options Elasticearch provides for analyzing text. Analyzers, normalizers, token filters are out of the scope of this documentation, you can find loads of information about them in [official docs](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/analysis.html).
 
-This is an example analysis config for russian language with stop-words filter and snowball stemmer:
+This is an example analysis config for the Russian language with stop-words filter and snowball stemmer:
 ```php
 <?php
 // config/main.php
@@ -244,7 +244,7 @@ return [
 ```
 Highlighting 
 -------------
-Elasticsearch provide a way to highlight search terms in source text. If you search for 'New possibilities' the word 'possibility' found in some document would be surrounded with tags like so `<em>possibility</em>`. These highligted results would be in the 'highlight' field of the response, not in the '_source' field.
+Elasticsearch provides a way to highlight search terms in the source text. If you search for 'New possibilities' the word 'possibility' found in some document would be surrounded with tags like so `<em>possibility</em>`. These highlighted results would be in the 'highlight' field of the response, not in the '_source' field.
  To turn on this functionality you should enable it in index configuration. Default sort order and limit options can be configured there as well:
 ```php
 <?php
@@ -265,4 +265,4 @@ return [
     // ...
 ];
 ```
-Asterisk sign means it would highlight in all configured analyzed fields, but there is a catch. If you want to receive highlighted results in all text fields, then you shouldn't pass `_all` as field to the `match()` function.
+Asterisk sign means it would highlight in all configured analyzed fields, but there is a catch. If you want to receive highlighted results in all text fields, then you shouldn't pass `_all` as a search field to the `match()` function.
