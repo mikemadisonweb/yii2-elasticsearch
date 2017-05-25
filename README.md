@@ -6,7 +6,7 @@ Elasticsearch 5.0 came out with a bunch of [new features and improvements](https
 
 Compared to [elasticsearch-php](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html) this extension has more intuitive way of doing things, like index documents, search, percolate (reverse search), building complex filter conditions using simple SQL-like language. Also, it's highly configurable and extensible, it's not tightly tied to ActiveRecord models, but this can be easily implemented.
 
-The documentation is relevant for the latest stable version of the application.
+The documentation is relevant for the latest stable version of the extension.
 
 [![Latest Stable Version](https://poser.pugx.org/mikemadisonweb/yii2-elasticsearch/v/stable)](https://packagist.org/packages/mikemadisonweb/yii2-elasticsearch)
 [![License](https://poser.pugx.org/mikemadisonweb/yii2-elasticsearch/license)](https://packagist.org/packages/mikemadisonweb/yii2-elasticsearch)

@@ -36,10 +36,10 @@ class ConditionParser
         'not in' => self::NOT_IN_OPERATOR_TOKEN,
         '=' => self::EQUAL_OPERATOR_TOKEN,
         '!=' => self::NON_EQUAL_OPERATOR_TOKEN,
-        '>' => self::GT_OPERATOR,
         '>=' => self::GTE_OPERATOR,
-        '<' => self::LT_OPERATOR,
+        '>' => self::GT_OPERATOR,
         '<=' => self::LTE_OPERATOR,
+        '<' => self::LT_OPERATOR,
     ];
 
     protected $groupingMap = [
@@ -61,10 +61,10 @@ class ConditionParser
         5 => self::NOT_IN_OPERATOR_TOKEN,
         6 => self::EQUAL_OPERATOR_TOKEN,
         7 => self::NON_EQUAL_OPERATOR_TOKEN,
-        8 => self::GT_OPERATOR,
-        9 => self::GTE_OPERATOR,
-        10 => self::LT_OPERATOR,
-        11 => self::LTE_OPERATOR,
+        8 => self::GTE_OPERATOR,
+        9 => self::GT_OPERATOR,
+        10 => self::LTE_OPERATOR,
+        11 => self::LT_OPERATOR,
         12 => self::SEPARATOR_TOKEN,
         13 => self::GROUP_START_TOKEN,
         14 => self::GROUP_END_TOKEN,
