@@ -125,6 +125,38 @@ class Finder
     }
 
     /**
+     * Dynamic highlighting (have higher priority over configuration defaults)
+     * @param $enable
+     * @param array $options
+     * @return $this
+     * @throws \Exception
+     */
+    public function highlight($enable, $options = [])
+    {
+        if (is_bool($enable)) {
+            if ($enable) {
+                if (isset($options['fields'])) {
+                    $this->params['body']['highlight']['fields'] = $options['fields'];
+                } else {
+                    $this->params['body']['highlight']['fields'] = ['*' => ['number_of_fragments' => 0]];
+                }
+                if (isset($options['pre_tags'])) {
+                    $this->params['body']['highlight']['pre_tags'] = $options['pre_tags'];
+                }
+                if (isset($options['post_tags'])) {
+                    $this->params['body']['highlight']['post_tags'] = $options['post_tags'];
+                }
+            } else {
+                $this->params['body']['highlight'] = [];
+            }
+        } else {
+            throw new \Exception('Value passed to `highlight` method should be a boolean');
+        }
+
+        return $this;
+    }
+
+    /**
      * Full-text searches
      * @param $query
      * @param string $fields
@@ -225,8 +257,9 @@ class Finder
         if (!isset($this->params['body']['query'])) {
             $this->params['body']['query'] = $this->query->build();
         }
-
-        $this->params = $this->defaultsResolver->resolve($this->params);
+        if (null !== $this->defaultsResolver) {
+            $this->params = $this->defaultsResolver->resolve($this->params);
+        }
         $response = $this->client->search($this->params);
         $this->reset();
 

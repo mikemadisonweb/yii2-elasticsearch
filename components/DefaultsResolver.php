@@ -60,6 +60,8 @@ class DefaultsResolver
                     $params['body']['highlight']['post_tags'] = $this->highlight['post_tags'];
                 }
             }
+        } elseif (empty($params['body']['highlight'])) {
+            unset($params['body']['highlight']);
         }
 
         return $params;

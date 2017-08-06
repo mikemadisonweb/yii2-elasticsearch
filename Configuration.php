@@ -256,7 +256,7 @@ class Configuration extends Component
     private function getDefaultMapping(array $index, $mapping)
     {
         if (!isset($index['body']['mappings']) || empty($index['body']['mappings'])) {
-            throw new InvalidConfigException("At least one mapping should be configured for {$index['index']} mapping should be configured.");
+            throw new InvalidConfigException("At least one mapping should be configured for {$index['index']}.");
         }
         $mappings = $index['body']['mappings'];
         if ('' === $mapping) {
@@ -270,7 +270,7 @@ class Configuration extends Component
 
             return $defaultMapping;
         }
-        if (!isset($mappings[$mapping]) || empty($mappings[$mapping])) {
+        if (!isset($mappings[$mapping])) {
             throw new InvalidConfigException("`{$mapping}` mapping is not configured");
         }
 
