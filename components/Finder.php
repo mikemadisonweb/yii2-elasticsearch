@@ -29,9 +29,6 @@ class Finder
 
     public function __construct($index, $mapping, Client $client)
     {
-        if (!isset($index['index'])) {
-            throw new InvalidConfigException('Index name is not configured.');
-        }
         $this->index = $index;
         $this->mapping = $mapping;
         $this->client = $client;
@@ -300,11 +297,13 @@ class Finder
      */
     public function reset()
     {
-        $this->params = [
-            'index' => $this->index['index'],
-            'type' => $this->mapping,
-            'body' => null,
-        ];
+        if(isset($this->index['index'])) {
+            $this->params = [
+                'index' => $this->index['index'],
+                'type' => $this->mapping,
+                'body' => null,
+            ];
+        }
         if (null === $this->query) {
             $this->query = new BoolQuery();
         } else {

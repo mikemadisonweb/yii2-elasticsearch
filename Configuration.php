@@ -69,12 +69,16 @@ class Configuration extends Component
      * @param string $clientName
      * @return object
      */
-    public function getFinder($indexName, $mapping = '', $clientName = '')
+    public function getFinder($indexName = '', $mapping = '', $clientName = '')
     {
-        $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
-            return $index['index'] === $indexName;
-        }));
-        $mapping = $this->getDefaultMapping($index, $mapping);
+        if ('' !== $indexName) {
+            $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
+                return $index['index'] === $indexName;
+            }));
+            $mapping = $this->validateMapping($index, $mapping);
+        } else {
+            $index = [];
+        }
         $client = $this->selectClient($clientName);
         $finder = \Yii::createObject(Finder::class, [$index, $mapping, $client]);
 
@@ -92,7 +96,7 @@ class Configuration extends Component
         $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
             return $index['index'] === $indexName;
         }));
-        $mapping = $this->getDefaultMapping($index, $mapping);
+        $mapping = $this->validateMapping($index, $mapping);
         $client = $this->selectClient($clientName);
         if (isset($this->clients[$this->selectedClient]['serializer'])) {
             $serializerClassName = $this->clients[$this->selectedClient]['serializer'];
@@ -117,7 +121,7 @@ class Configuration extends Component
         $index = current(array_filter($this->indexes, function ($index) use ($indexName) {
             return $index['index'] === $indexName;
         }));
-        $mapping = $this->getDefaultMapping($index, $mapping);
+        $mapping = $this->validateMapping($index, $mapping);
         $client = $this->selectClient($clientName);
 
         return \Yii::createObject(Indexer::class, [$index, $mapping, $client]);
@@ -253,25 +257,19 @@ class Configuration extends Component
      * @return mixed
      * @throws InvalidConfigException
      */
-    private function getDefaultMapping(array $index, $mapping)
+    private function validateMapping(array $index, $mapping)
     {
         if (!isset($index['body']['mappings']) || empty($index['body']['mappings'])) {
             throw new InvalidConfigException("At least one mapping should be configured for {$index['index']}.");
         }
         $mappings = $index['body']['mappings'];
-        if ('' === $mapping) {
+        if ($mapping !== '') {
             if ('_default_' === $mapping || (count($mappings) === 1 && isset($mappings['_default_']))) {
                 throw new InvalidConfigException('It is forbidden to index into the default mapping.');
             }
-            // Get first non-default mapping
-            $defaultMapping = current(array_filter(array_keys($mappings), function ($mapping) {
-                return $mapping !== '_default_';
-            }));
-
-            return $defaultMapping;
-        }
-        if (!isset($mappings[$mapping])) {
-            throw new InvalidConfigException("`{$mapping}` mapping is not configured");
+            if (!isset($mappings[$mapping])) {
+                throw new InvalidConfigException("`{$mapping}` mapping is not configured in `{$index}`");
+            }
         }
 
         return $mapping;
