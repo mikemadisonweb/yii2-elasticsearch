@@ -8,8 +8,6 @@ use mikemadisonweb\elasticsearch\components\queries\BoolQuery;
 use mikemadisonweb\elasticsearch\components\queries\QueryInterface;
 use mikemadisonweb\elasticsearch\components\responses\FinderResponse;
 use Elasticsearch\Client;
-use mikemadisonweb\elasticsearch\components\responses\IndexerResponse;
-use yii\base\InvalidConfigException;
 
 class Finder
 {

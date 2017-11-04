@@ -9,7 +9,6 @@ use Elasticsearch\Serializers\SmartSerializer;
 use mikemadisonweb\elasticsearch\components\Finder;
 use mikemadisonweb\elasticsearch\components\Indexer;
 use mikemadisonweb\elasticsearch\components\Percolator;
-use mikemadisonweb\elasticsearch\components\queries\Query;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
 
