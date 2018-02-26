@@ -2,8 +2,6 @@ Elasticsearch Extension for Yii2
 ==================
 Yii2 extension for integration with Elasticsearch version 5.0 and above, based on official [elasticsearch-php](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html) low-level client. 
 
-Elasticsearch 5.0 came out with a bunch of [new features and improvements](https://www.elastic.co/guide/en/elasticsearch/reference/5.4/es-release-notes.html) which is intriguing. Sadly, but Yii2 official extension support is limited to versions from 1.0 to 2.4.
-
 Compared to [elasticsearch-php](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/index.html) this extension has more intuitive way of doing things, like index documents, search, percolate (reverse search), building complex filter conditions using simple SQL-like language. Also, it's highly configurable and extensible, it's not tightly tied to ActiveRecord models, but this can be easily implemented.
 
 The documentation is relevant for the latest stable version of the extension.
