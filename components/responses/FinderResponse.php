@@ -24,7 +24,7 @@ class FinderResponse extends ElasticResponse implements \Iterator
         $this->executionTime = $response['took'];
         $this->isTimedOut = $response['timed_out'];
         $this->hits = $response['hits']['hits'];
-        $this->aggregations = $response['aggregations'];
+        $this->aggregations = isset($response['aggregations']) ? $response['aggregations'] : null;
         $this->total = $response['hits']['total'];
         $this->maxScore = $response['hits']['max_score'];
 
