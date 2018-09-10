@@ -13,6 +13,7 @@ class FinderResponse extends ElasticResponse implements \Iterator
     public $maxScore;
 
     protected $hits;
+    protected $aggregations;
 
     /**
      * FinderResponse constructor.
@@ -23,6 +24,7 @@ class FinderResponse extends ElasticResponse implements \Iterator
         $this->executionTime = $response['took'];
         $this->isTimedOut = $response['timed_out'];
         $this->hits = $response['hits']['hits'];
+        $this->aggregations = isset($response['aggregations']) ? $response['aggregations'] : null;
         $this->total = $response['hits']['total'];
         $this->maxScore = $response['hits']['max_score'];
 
@@ -35,6 +37,14 @@ class FinderResponse extends ElasticResponse implements \Iterator
     public function getHits()
     {
         return $this->hits;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getAggregations()
+    {
+        return $this->aggregations;
     }
 
     public function rewind()
